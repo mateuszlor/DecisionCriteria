@@ -25,8 +25,8 @@ namespace DecisionCriteria.Library
         #region Fields
 
         private Dictionary<string, List<T>> _decisions;
-        private Func<object, double> _selector;
-        private bool _isSimpleComparable;
+        private Func<T, double> _selector;
+        private bool _isSimpleNumeric;
         private IList<double> _probabilities;
 
         #endregion // Fields
@@ -36,7 +36,7 @@ namespace DecisionCriteria.Library
         /// <summary>
         /// Selector used to determine numeric value of generic type T if T is not simple comparable type
         /// </summary>
-        public Func<object, double> Selector
+        public Func<T, double> Selector
         {
             get { return _selector; }
             set
@@ -93,7 +93,7 @@ namespace DecisionCriteria.Library
                     var max = decision.Value.Max();
                     var values = decision.Value
                         .Select(value =>
-                            _isSimpleComparable
+                            _isSimpleNumeric
                                 ? (dynamic) max - (dynamic) value
                                 : (dynamic) Selector(max) - (dynamic) Selector(value))
                         .Select(x => (T) x)
@@ -125,7 +125,7 @@ namespace DecisionCriteria.Library
                 {
                     var values = decision.Value
                         .Select((value, i) =>
-                            _isSimpleComparable
+                            _isSimpleNumeric
                                 ? (dynamic) maxColumn[i] - (dynamic) value
                                 : (dynamic) Selector(maxColumn[i]) - (dynamic) Selector(value))
                         .Select(x => (T) x)
@@ -151,7 +151,9 @@ namespace DecisionCriteria.Library
             {
                 var r = (dynamic)x1 - (dynamic)x2;
                 r.Equals(default(T));
-                _isSimpleComparable = true;
+
+                _isSimpleNumeric = true;
+                _selector = x => x as dynamic;
             }
             catch (Exception e1)
             {
@@ -160,11 +162,11 @@ namespace DecisionCriteria.Library
                     var r = (dynamic)Selector(x1) - (dynamic)Selector(x2);
                     r.Equals((dynamic) Selector(default(T)));
 
-                    _isSimpleComparable = false;
+                    _isSimpleNumeric = false;
                 }
                 catch (Exception e2)
                 {
-                    var message = string.Format("Generic type {0} is not valid nuymeric type", typeof(T));
+                    var message = string.Format("Generic type {0} is not valid numeric type", typeof(T));
                     throw new ArgumentException(message, nameof(T), new AggregateException(e1, e2));
                 }
             }
@@ -256,21 +258,21 @@ namespace DecisionCriteria.Library
 
         #region Decisions
 
-        private Dictionary<string, T> CalculateMin(Dictionary<string, List<T>> matrix)
+        private Dictionary<string, double> CalculateMin(Dictionary<string, List<T>> matrix)
         {
             return matrix.Select(x => new
             {
                 x.Key,
-                Min = x.Value.Min()
+                Min = x.Value.Select(Selector).Min()
             }).ToDictionary(x => x.Key, x => x.Min);
         }
 
-        private Dictionary<string, T> CalculateMax(Dictionary<string, List<T>> matrix)
+        private Dictionary<string, double> CalculateMax(Dictionary<string, List<T>> matrix)
         {
             return matrix.Select(x => new
             {
                 x.Key,
-                Min = x.Value.Max()
+                Min = x.Value.Select(Selector).Max()
             }).ToDictionary(x => x.Key, x => x.Min);
         }
 
@@ -313,8 +315,8 @@ namespace DecisionCriteria.Library
                 new
                 {
                     d,
-                    resultValue = realismFactor * (double)Convert.ChangeType(d.Value.Min(), typeof(double)) +
-                                   (1 - realismFactor) * (double)Convert.ChangeType(d.Value.Max(), typeof(double))
+                    resultValue = realismFactor * d.Value.Select(Selector).Min() +
+                                   (1 - realismFactor) * d.Value.Select(Selector).Max()
                 });
             var bestValue = result.OrderByDescending(x => x.resultValue).First().resultValue;
 
@@ -338,7 +340,7 @@ namespace DecisionCriteria.Library
 
             foreach (var decision in _decisions)
             {
-                var singleResult = decision.Value.Select((t, i) => probabilities[i] * (double)Convert.ChangeType(t, typeof(double))).Sum();
+                var singleResult = decision.Value.Select((t, i) => probabilities[i]*Selector(t)).Sum();
                 calculated.Add(decision.Key, singleResult);
             }
             return calculated;
@@ -427,7 +429,7 @@ namespace DecisionCriteria.Library
         /// Use this constructor in order to operate on complex non comparable types
         /// </summary>
         /// <param name="selector">Numeric value selector</param>
-        public Matrix(Func<object, double> selector)
+        public Matrix(Func<T, double> selector)
         {
             Selector = selector;
             _decisions = new Dictionary<string, List<T>>();

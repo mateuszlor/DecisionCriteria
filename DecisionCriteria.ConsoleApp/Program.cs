@@ -16,10 +16,9 @@ namespace DecisionCriteria.ConsoleApp
             matrix.AddDecision("Decision 4", new List<int> {90, -22, 3, 0});
             matrix.AddDecision("Decision 5", new List<int> {9, 21, 5, 0});
             
-
-
-
             matrix.States = new List<string>() { "I", "II", "III", "IV" };
+
+            Console.WriteLine(matrix.PrintAll());
 
             Console.WriteLine();
             Console.WriteLine("Best by minimax is: '{0}'", matrix.MiniMax());

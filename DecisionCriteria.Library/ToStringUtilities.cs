@@ -4,7 +4,7 @@ namespace DecisionCriteria.Library
 {
     public static class ToStringUtilities
     {
-        public static string PrintAll(this Matrix matrix)
+        public static string PrintAll<T>(this Matrix<T> matrix)
         {
             var sb = new StringBuilder();
 
