@@ -52,13 +52,6 @@ namespace DecisionCriteria.ExcelReader
             Console.WriteLine("Best by Bayes criteria (probabilities not set) are '{0}",
                 string.Join(", ", matrix.BayesMultiple()));
 
-            var probabilities = new[] { 0.1, 0.1, 0.3, 0.5 };
-            Console.WriteLine("Best by Bayes criteria (probabilities: {0}) are / is {1}",
-                string.Join(", ", probabilities), string.Join(", ", matrix.BayesMultiple(probabilities)));
-            probabilities = new[] { 0.2, 0.5, 0.1, 0.2 };
-            Console.WriteLine("Best by Bayes criteria (probabilities: {0}) are / is {1}",
-                string.Join(", ", probabilities), string.Join(", ", matrix.BayesMultiple(probabilities)));
-
             Console.WriteLine("Best by Savage criteria is: '{0}", string.Join(", ", matrix.SavageMultiple()));
 
             #endregion // Calculate

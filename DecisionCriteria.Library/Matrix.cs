@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
@@ -27,7 +28,7 @@ namespace DecisionCriteria.Library
         private Dictionary<string, List<T>> _decisions;
         private Func<T, double> _selector;
         private bool _isSimpleNumeric;
-        private IList<double> _probabilities;
+        private IList<float> _probabilities;
 
         #endregion // Fields
 
@@ -63,7 +64,7 @@ namespace DecisionCriteria.Library
         /// </summary>
         public IList<string> States { get; set; }
 
-        public IList<double> Probabilities
+        public IList<float> Probabilities
         {
             get
             {
@@ -71,6 +72,15 @@ namespace DecisionCriteria.Library
                 }
             set
             {
+                Debug.WriteLine("Probabilities: {0}", string.Join("; ", value) as object);
+                var sum = value.Sum(x => (float) x);
+               
+                var x1 = value[0];
+                var x2 = value[1];
+                var x3 = value[2];
+                var x4 = value[3];
+                var x5 = value[4];
+                Debug.WriteLine("Sum = {0} | Equals(1) = {1}",sum, sum == 1d);
                 if (!value.Sum().Equals(1))
                 {
                     throw new ArgumentException("Probabilities must sum up to 1", nameof(Probabilities));
@@ -328,7 +338,7 @@ namespace DecisionCriteria.Library
             return HurwiczMultiple(realismFactor).First();
         }
 
-        private Dictionary<string, double> CalculateBayes(IList<double> probabilities)
+        private Dictionary<string, double> CalculateBayes(IList<float> probabilities)
         {
             var number = (double)Convert.ChangeType(default(T), typeof(double));
             if (!number.Equals(0))
@@ -348,12 +358,12 @@ namespace DecisionCriteria.Library
 
         public string Bayes()
         {
-            IList<double> probabilities;
+            IList<float> probabilities;
 
             if (_probabilities == null || !_probabilities.Any())
             {
                 var statesCount = _decisions.First().Value.Count;
-                probabilities = Enumerable.Repeat(1d/statesCount, statesCount).ToList();
+                probabilities = Enumerable.Repeat(1f/statesCount, statesCount).ToList();
             }
             else
             {
@@ -365,12 +375,12 @@ namespace DecisionCriteria.Library
 
         public List<string> BayesMultiple()
         {
-            IList<double> probabilities;
+            IList<float> probabilities;
 
             if (_probabilities == null || !_probabilities.Any())
             {
                 var statesCount = _decisions.First().Value.Count;
-                probabilities = Enumerable.Repeat(1d / statesCount, statesCount).ToList();
+                probabilities = Enumerable.Repeat(1f / statesCount, statesCount).ToList();
             }
             else
             {
@@ -380,7 +390,7 @@ namespace DecisionCriteria.Library
             return BayesMultiple(probabilities);
         }
 
-        public string Bayes(IList<double> probabilities)
+        public string Bayes(IList<float> probabilities)
         {
             if (!probabilities.Sum().Equals(1))
             {
@@ -389,7 +399,7 @@ namespace DecisionCriteria.Library
             return CalculateBayes(probabilities).OrderByDescending(x => x.Value).First().Key;
         }
 
-        public List<string> BayesMultiple(IList<double> probabilities)
+        public List<string> BayesMultiple(IList<float> probabilities)
         {
             var calculated = CalculateBayes(probabilities);
             var best = calculated.OrderByDescending(x => x.Value).First().Value;

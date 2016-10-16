@@ -41,10 +41,10 @@ namespace DecisionCriteria.ConsoleApp
                 matrix.Hurwicz(parameter));
 
             Console.WriteLine("Best by Bayes criteria (equals probabilities) is: '{0}'", matrix.Bayes());
-            var probabilities = new[] {0.1, 0.1, 0.3, 0.5};
+            var probabilities = new[] {0.1f, 0.1f, 0.3f, 0.5f};
             Console.WriteLine("Best by Bayes criteria (probabilities: {0}) is: '{1}'", string.Join(", ", probabilities),
                 matrix.Bayes(probabilities));
-            probabilities = new[] {0.2, 0.5, 0.1, 0.2};
+            probabilities = new[] {0.2f, 0.5f, 0.1f, 0.2f};
             Console.WriteLine("Best by Bayes criteria (probabilities: {0}) is: '{1}'", string.Join(", ", probabilities),
                 matrix.Bayes(probabilities));
 

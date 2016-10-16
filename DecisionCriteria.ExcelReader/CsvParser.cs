@@ -32,7 +32,7 @@ namespace ExcelReader
                 if (p[0].ToLower() == "probabilities")
                 {
                     skip = 2;
-                    matrix.Probabilities = p.Skip(1).Select(double.Parse).ToList();
+                    matrix.Probabilities = p.Skip(1).Select(float.Parse).ToList();
                 }
 
                 var data =
